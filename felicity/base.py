@@ -13,7 +13,6 @@ class Config(object):
         try:
             from django.conf import settings
         except ImportError:
-            raise
             # look for settings.py in the current directory, otherwise fallback
             # to defaults
             for module in ['settings', 'felicity.defaults']:
@@ -27,8 +26,8 @@ class Config(object):
         try:
             cls = settings.FELICITY_BACKEND
         except AttributeError:
-            raise Exception('FELICITY_BACKEND is not defined in %s' % settings)
-        cls = import_object(settings.FELICITY_BACKEND)
+            raise Exception('FELICITY_BACKEND is a required setting')
+        cls = import_object(cls)
         backend = cls(settings)
         self.__dict__['settings'] = settings
         self.__dict__['backend'] = backend
@@ -47,8 +46,7 @@ class Config(object):
 
     def __setattr__(self, key, value):
         if key not in self.settings.FELICITY_CONFIG:
-            #print(self.settings.FELICITY_CONFIG)
-            raise AttributeError(self.settings.FELICITY_CONFIG)
+            raise AttributeError(key)
         self.backend.set(key, value)
 
     def __dir__(self):

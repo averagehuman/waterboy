@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 from datetime import datetime, date, time
 from decimal import Decimal
-from django.utils import six
+import six
 
 if six.PY3:
     def long(value):

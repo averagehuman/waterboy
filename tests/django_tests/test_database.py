@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from felicity import settings
-from tests.storage import StorageTestsMixin
+from tests.base import StorageTestsMixin
 
 
 class TestDatabase(StorageTestsMixin, TestCase):

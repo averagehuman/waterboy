@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     'felicity.backends.database',
 )
 
-ROOT_URLCONF = 'tests.urls'
+ROOT_URLCONF = 'tests.django_tests.urls'
 
 
 long_value = 123456

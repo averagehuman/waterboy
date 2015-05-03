@@ -1,5 +1,18 @@
 import sys
 
+try:
+    import cPickle as _pickle
+except ImportError:
+    import pickle as _pickle
+
+if sys.version_info[0] == 2:
+    bytes = str
+
+def pickle(value):
+    return _pickle.dumps(value, protocol=_pickle.HIGHEST_PROTOCOL)
+
+def unpickle(encoded_value):
+    return _pickle.loads(bytes(encoded_value))
 
 def import_module(path):
     __import__(path)

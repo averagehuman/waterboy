@@ -1,18 +1,12 @@
-Constance - Dynamic Django settings
-===================================
+Felicity - Dynamic Application settings
+=======================================
 
-.. image:: https://secure.travis-ci.org/jezdez/django-constance.png
-    :alt: Build Status
-    :target: http://travis-ci.org/jezdez/django-constance
 
-A Django app for storing dynamic settings in pluggable backends (Redis and
-Django model backend built in) with an integration with the Django admin app.
+A library for storing dynamic settings in pluggable backends (Redis, MongoDB and
+Django model backends built in).
 
-For more information see the documentation at:
+This is a forked framework-agnostic version of `django-constance`_ by
+Jannis Leidel and others (see AUTHORS file).
 
-http://django-constance.readthedocs.org/
+.. _django-constance: http://django-constance.readthedocs.org/
 
-If you have questions or have trouble using the app please file a bug report
-at:
-
-https://github.com/jezdez/django-constance/issues

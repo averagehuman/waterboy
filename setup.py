@@ -18,17 +18,25 @@ def find_version(*file_paths):
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
+requires = [
+    'six',
+    'lazy-object-proxy',
+]
+extras = {
+    'database': ['django-picklefield'],
+    'redis': ['redis'],
+}
 
 setup(
-    name='django-constance',
-    version=find_version("constance", "__init__.py"),
-    url="http://github.com/jezdez/django-constance",
-    description='Django live settings with pluggable backends, including Redis.',
+    name='felicity',
+    version=find_version("felicity", "__init__.py"),
+    url="http://github.com/gmflanagan/felicity",
+    description='Live application settings with pluggable backends, including Redis and MongoDB.',
     long_description=read('README.rst'),
-    author='Jannis Leidel',
-    author_email='jannis@leidel.info',
+    author='Jerd Flanagan',
+    author_email='gmflanagan@outlook.com',
     license='BSD',
-    keywords='django libraries settings redis'.split(),
+    keywords='libraries settings redis mongodb'.split(),
     platforms='any',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -40,19 +48,14 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Topic :: Utilities',
     ],
     packages=find_packages(exclude=['tests', 'tests.*']),
     include_package_data=True,
     zip_safe=False,
-    extras_require={
-        'database': ['django-picklefield'],
-        'redis': ['redis'],
-    }
+    install_requires=requires,
+    extras_require=extras,
 )

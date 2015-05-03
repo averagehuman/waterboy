@@ -7,7 +7,7 @@ if six.PY3:
     def long(value):
         return value
 
-from constance.base import Config
+from felicity.base import Config
 
 
 class StorageTestsMixin(object):

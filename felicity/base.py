@@ -21,17 +21,19 @@ class Settings(object):
                 mapping[k] = v
 
     def configure(self, settings_module=None, defaults=None):
+        if self.is_configured:
+            raise Exception("settings are already configured.")
         d = {}
         defaults = defaults or felicity_defaults.__dict__
         self._update_settings_map(d, defaults)
 
-        overrrides = None
+        overrides = None
         if isinstance(settings_module, six.string_types):
             __import__(settings_module)
             settings_module = sys.modules[settings_module]
 
         if settings_module:
-            overrrides = settings_module.__dict__
+            overrides = settings_module.__dict__
         else:
             # try django settings
             try:
@@ -43,12 +45,12 @@ class Settings(object):
                 except ImportError:
                     pass
                 else:
-                    overrrides = sys.modules[DEFAULT_SETTINGS_MODULE].__dict__
+                    overrides = sys.modules[DEFAULT_SETTINGS_MODULE].__dict__
             else:
                 # Django settings are proxied
-                overrrides = django_settings._wrapped.__dict__
-        if overrrides:
-            self._update_settings_map(d, overrrides)
+                overrides = django_settings._wrapped.__dict__
+        if overrides:
+            self._update_settings_map(d, overrides)
         self._settings = d
 
     @property

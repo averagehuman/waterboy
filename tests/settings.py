@@ -13,7 +13,7 @@ if not six.PY3:
 
 FELICITY_BACKEND = 'felicity.backends.redisd.RedisBackend'
 FELICITY_REDIS_PREFIX = 'felicity:'
-FELICITY_REDIS_CONNECTION_CLASS = 'tests.redis_mockup.Connection'
+FELICITY_REDIS_CONNECTION_CLASS = 'tests.storage.MockRedisConnection'
 FELICITY_REDIS_CONNECTION = {}
 FELICITY_SUPERUSER_ONLY = True
 FELICITY_CONFIG = {

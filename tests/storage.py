@@ -1,4 +1,5 @@
-class Connection(dict):
+
+class MockRedisConnection(dict):
     def set(self, key, value):
         self[key] = value
 

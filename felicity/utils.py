@@ -1,3 +1,4 @@
+import os
 import sys
 
 try:
@@ -7,6 +8,12 @@ except ImportError:
 
 if sys.version_info[0] == 2:
     bytes = str
+
+pathjoin = os.path.join
+pathexists = os.path.exists
+expanduser = os.path.expanduser
+abspath = os.path.abspath
+dirname = os.path.dirname
 
 def pickle(value):
     return _pickle.dumps(value, protocol=_pickle.HIGHEST_PROTOCOL)
@@ -18,10 +25,21 @@ def import_module(path):
     __import__(path)
     return sys.modules[path]
 
-def import_object(path):
-    module, name = path.rsplit('.', 1)
+def import_object(name):
+    """Imports an object by name.
+
+    import_object('x.y.z') is equivalent to 'from x.y import z'.
+
+    """
+    name = str(name)
+    if '.' not in name:
+        return __import__(name)
+    parts = name.split('.')
+    m = '.'.join(parts[:-1])
+    attr = parts[-1]
+    obj = __import__(m, None, None, [attr], 0)
     try:
-        return getattr(import_module(module), name)
-    except AttributeError:
-        raise ImportError("'%s' not found in module '%s'" % (name, module))
+        return getattr(obj, attr)
+    except AttributeError as e:
+        raise ImportError("'%s' does not exist in module '%s'" % (attr, m))
 

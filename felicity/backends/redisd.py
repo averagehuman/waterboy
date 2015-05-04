@@ -8,7 +8,6 @@ from ..utils import import_object, pickle, unpickle
 class RedisBackend(Backend):
 
     def __init__(self, settings):
-        super(RedisBackend, self).__init__()
         self._prefix = settings.FELICITY_REDIS_PREFIX
         connection_cls = settings.FELICITY_REDIS_CONNECTION_CLASS
         if connection_cls is not None:
@@ -20,6 +19,11 @@ class RedisBackend(Backend):
                 raise Exception(
                     "The Redis backend requires redis-py to be installed."
                 )
+            #if not settings.FELICITY_REDIS_CONNECTION:
+            #    raise Exception(
+            #        "The setting FELICITY_REDIS_CONNECTION is required for the"
+            #        " Redis backend"
+            #    )
             if isinstance(settings.FELICITY_REDIS_CONNECTION, six.string_types):
                 self._rd = redis.from_url(settings.REDIS_CONNECTION)
             else:

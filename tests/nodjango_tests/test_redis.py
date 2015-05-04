@@ -8,10 +8,11 @@ from tests.base import StorageTestsMixin
 class TestRedis(StorageTestsMixin, TestCase):
 
     def setUp(self):
-        super(TestRedis, self).setUp()
+        assert settings.is_configured
+        assert settings.FELICITY_REDIS_CONNECTION_CLASS == 'tests.redis_mockup.Connection'
         self.old_backend = settings.FELICITY_BACKEND
         settings.FELICITY_BACKEND = 'felicity.backends.redisd.RedisBackend'
-        self.config.backend._rd.clear()
+        super(TestRedis, self).setUp()
 
     def tearDown(self):
         self.config.backend._rd.clear()

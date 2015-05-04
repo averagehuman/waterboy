@@ -8,7 +8,7 @@ def config(request):
 
         TEMPLATE_CONTEXT_PROCESSORS = (
             # ...
-            'felicity.djagno.context_processors.config',
+            'felicity.contrib.django_felicity.context_processors.config',
         )
 
     """

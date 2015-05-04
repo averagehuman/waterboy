@@ -38,8 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
 
-    'felicity.djagno',
-    'felicity.backends.database',
+    'felicity.contrib.django_felicity',
 )
 
 ROOT_URLCONF = 'tests.django_tests.urls'

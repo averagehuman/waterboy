@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, RequestFactory
 
 from felicity import settings
-from felicity.djagno.admin import Config
+from felicity.contrib.django_felicity.admin import Config
 
 
 class TestAdmin(TestCase):

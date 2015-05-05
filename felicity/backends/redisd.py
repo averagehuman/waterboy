@@ -1,7 +1,7 @@
 import six
 from six.moves import zip
 
-from . import Backend
+from .import Backend
 from ..utils import import_object, pickle, unpickle
 
 

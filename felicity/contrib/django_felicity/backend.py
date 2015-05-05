@@ -7,7 +7,7 @@ try:
 except ImportError:
     from django.core.cache.backends.locmem import CacheClass as LocMemCache
 
-from felicity.backend import Backend
+from felicity.backends import Backend
 
 
 class DatabaseBackend(Backend):

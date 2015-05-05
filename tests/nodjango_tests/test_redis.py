@@ -8,7 +8,7 @@ from tests.base import StorageTestsMixin
 class TestRedis(StorageTestsMixin, TestCase):
 
     def setUp(self):
-        assert settings.is_configured
+        assert settings.configured
         assert settings.FELICITY_REDIS_CONNECTION_CLASS == 'tests.storage.MockRedisConnection'
         self.old_backend = settings.FELICITY_BACKEND
         settings.FELICITY_BACKEND = 'felicity.backends.redisd.RedisBackend'

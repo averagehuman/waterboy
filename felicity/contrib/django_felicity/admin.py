@@ -162,7 +162,7 @@ class FelicityAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        if settings.FELICITY_SUPERUSER_ONLY:
+        if settings.FELICITY_DATABASE_SUPERUSER_ONLY:
             return request.user.is_superuser
         return super(FelicityAdmin, self).has_change_permission(request, obj)
 

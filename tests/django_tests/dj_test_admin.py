@@ -27,7 +27,7 @@ class TestAdmin(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_custom_auth(self):
-        settings.FELICITY_SUPERUSER_ONLY = False
+        settings.FELICITY_DATABASE_SUPERUSER_ONLY = False
         self.client.login(username='normal', password='nimda')
         request = self.rf.get('/admin/felicity/config/')
         request.user = self.normaluser

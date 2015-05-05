@@ -32,6 +32,6 @@ class Test(Command):
     def take_action(self, args):
         cmdline = "-vv --cov felicity --cov-report term".split()
         cmdline.append(args.target)
-        assert settings.is_configured
+        assert settings.configured
         pytest.main(cmdline)
 

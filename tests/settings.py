@@ -15,7 +15,7 @@ FELICITY_BACKEND = 'felicity.backends.redisd.RedisBackend'
 FELICITY_REDIS_PREFIX = 'felicity:'
 FELICITY_REDIS_CONNECTION_CLASS = 'tests.storage.MockRedisConnection'
 FELICITY_REDIS_CONNECTION = {}
-FELICITY_SUPERUSER_ONLY = True
+FELICITY_DATABASE_SUPERUSER_ONLY = True
 FELICITY_CONFIG = {
     'INT_VALUE': (1, 'some int'),
     'LONG_VALUE': (long_value, 'some looong int'),

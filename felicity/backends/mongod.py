@@ -1,6 +1,8 @@
 import six
 from six.moves import zip
 
+import pymongo
+
 from .import Backend
 from .. import register_setting
 from ..utils import import_object, pickle, unpickle
@@ -28,12 +30,6 @@ class MongoBackend(Backend):
         if connection_cls is not None:
             self._client = import_object(connection_cls)()
         else:
-            try:
-                import pymongo
-            except ImportError:
-                raise Exception(
-                    "The MongoDB backend requires pymongo to be installed."
-                )
             url_or_kwargs = settings.MONGO_CONNECTION
             if not url_or_kwargs:
                 raise Exception(

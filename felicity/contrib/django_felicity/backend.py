@@ -7,15 +7,22 @@ try:
 except ImportError:
     from django.core.cache.backends.locmem import CacheClass as LocMemCache
 
+from felicity import register_setting
 from felicity.backends import Backend
+
+# optional
+register_setting('DATABASE_SUPERUSER_ONLY', False)
+register_setting('DATABASE_CACHE_BACKEND', None)
+register_setting('DATABASE_CACHE_AUTOFILL_TIMEOUT', 60 * 60 * 24)
+register_setting('DATABASE_PREFIX', '')
 
 
 class DatabaseBackend(Backend):
     def __init__(self, settings):
         from .models import Felicity
         self._model = Felicity
-        self._prefix = settings.FELICITY_DATABASE_PREFIX
-        self._autofill_timeout = settings.FELICITY_DATABASE_CACHE_AUTOFILL_TIMEOUT
+        self._prefix = settings.DATABASE_PREFIX
+        self._autofill_timeout = settings.DATABASE_CACHE_AUTOFILL_TIMEOUT
         self._autofill_cachekey = 'autofilled'
 
         if not self._model._meta.installed:
@@ -23,17 +30,17 @@ class DatabaseBackend(Backend):
                 "The felicity.backends.database app isn't installed "
                 "correctly. Make sure it's in your INSTALLED_APPS setting.")
 
-        if settings.FELICITY_DATABASE_CACHE_BACKEND:
-            self._cache = get_cache(settings.FELICITY_DATABASE_CACHE_BACKEND)
+        if settings.DATABASE_CACHE_BACKEND:
+            self._cache = get_cache(settings.DATABASE_CACHE_BACKEND)
             if isinstance(self._cache, LocMemCache):
                 raise ImproperlyConfigured(
-                    "The FELICITY_DATABASE_CACHE_BACKEND setting refers to a "
+                    "The DATABASE_CACHE_BACKEND setting refers to a "
                     "subclass of Django's local-memory backend (%r). Please set "
                     "it to a backend that supports cross-process caching."
-                    % settings.FELICITY_DATABASE_CACHE_BACKEND)
+                    % settings.DATABASE_CACHE_BACKEND)
         else:
             self._cache = None
-        self._keys = settings.FELICITY_CONFIG.keys()
+        self._keys = settings.CONFIG.keys()
         self.autofill()
         # Clear simple cache.
         post_save.connect(self.clear, sender=self._model)

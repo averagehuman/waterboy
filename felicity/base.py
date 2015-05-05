@@ -2,7 +2,6 @@ import sys
 
 import six
 
-from . import defaults as felicity_defaults
 from .utils import import_object
 
 DEFAULT_SETTINGS_MODULE = 'settings'
@@ -11,9 +10,7 @@ EMPTY = object()
 
 class Settings(object):
 
-    _defaults = {
-        'BACKEND': 'felicity.backends.MongoBackend',
-    }
+    _defaults = {}
 
     @classmethod
     def prefixed(cls, key):
@@ -38,20 +35,17 @@ class Settings(object):
             if k and k == k.upper():
                 mapping[self.prefixed(k)] = v
 
-    def configure(self, settings_module=None, defaults=None):
+    def configure(self, settings_module=None, **overrides):
         if self.configured:
             raise Exception("settings are already configured.")
-        d = {}
-        defaults = defaults or felicity_defaults.__dict__
-        self._update_settings_map(d, defaults)
 
-        overrides = None
+        initial = None
         if isinstance(settings_module, six.string_types):
             __import__(settings_module)
             settings_module = sys.modules[settings_module]
 
         if settings_module:
-            overrides = settings_module.__dict__
+            initial = settings_module.__dict__
         else:
             # try django settings
             try:
@@ -63,10 +57,13 @@ class Settings(object):
                 except ImportError:
                     pass
                 else:
-                    overrides = sys.modules[DEFAULT_SETTINGS_MODULE].__dict__
+                    initial = sys.modules[DEFAULT_SETTINGS_MODULE].__dict__
             else:
                 # Django settings are proxied
-                overrides = django_settings._wrapped.__dict__
+                initial = django_settings._wrapped.__dict__
+        d = {}
+        if initial:
+            self._update_settings_map(d, initial)
         if overrides:
             self._update_settings_map(d, overrides)
         self._settings = d
@@ -96,6 +93,12 @@ class Config(object):
     The global config wrapper that handles the backend.
     """
 
+    aliases = {
+        'redis': 'felicity.backends.redisd.RedisBackend',
+        'mongo': 'felicity.backends.mongod.MongoBackend',
+        'database': 'felicity.contrib.django_felicity.backend.DatabaseBackend',
+    }
+
     def __init__(self, settings=None):
         settings = settings or Settings()
         try:
@@ -104,6 +107,11 @@ class Config(object):
             cls = None
         if not cls:
             raise Exception('BACKEND is a required setting')
+        try:
+            # may be an alias
+            cls = self.aliases[cls]
+        except KeyError:
+            pass
         cls = import_object(cls)
         backend = cls(settings)
         self.__dict__['settings'] = settings

@@ -29,6 +29,7 @@ requires = [
 extras = {
     'database': ['django-picklefield'],
     'redis': ['redis'],
+    'mongo': ['pymongo>=3.0.1'],
 }
 
 entry_points = '''

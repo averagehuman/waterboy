@@ -6,22 +6,40 @@ from . import defaults as felicity_defaults
 from .utils import import_object
 
 DEFAULT_SETTINGS_MODULE = 'settings'
-
+PREFIX = 'FELICITY_'
 EMPTY = object()
 
 class Settings(object):
+
+    _defaults = {
+        'BACKEND': 'felicity.backends.MongoBackend',
+    }
+
+    @classmethod
+    def prefixed(cls, key):
+        """Prefixes keys if they are not already prefixed, so you have the
+        option of declaring settings with a prepended 'FELICITY_' (for clarity)
+        or not (for convenience).
+        """
+        if not key.startswith(PREFIX):
+            key = PREFIX + key
+        return key
+
+    @classmethod
+    def setdefault(cls, key, default):
+        cls._defaults[cls.prefixed(key)] = default
 
     def __init__(self):
         self.__dict__['_settings'] = EMPTY
 
     def _update_settings_map(self, mapping, d):
-        """update mapping with values from d that have uppercase keys"""
+        """Update mapping with values from d that have uppercase keys"""
         for k, v in d.items():
             if k and k == k.upper():
-                mapping[k] = v
+                mapping[self.prefixed(k)] = v
 
     def configure(self, settings_module=None, defaults=None):
-        if self.is_configured:
+        if self.configured:
             raise Exception("settings are already configured.")
         d = {}
         defaults = defaults or felicity_defaults.__dict__
@@ -54,18 +72,24 @@ class Settings(object):
         self._settings = d
 
     @property
-    def is_configured(self):
+    def configured(self):
         return self._settings is not EMPTY
 
     def __getattr__(self, key):
         if self._settings is EMPTY:
             self.configure()
+        prefixed_key = self.prefixed(key)
         try:
-            result = self._settings[key]
+            val = self._settings[prefixed_key]
         except KeyError:
+            try:
+                val = self._defaults[prefixed_key]
+            except KeyError:
+                val = EMPTY
+        if val is EMPTY:
             raise AttributeError(key)
-        setattr(self, key, result)
-        return result
+        setattr(self, key, val)
+        return val
 
 class Config(object):
     """
@@ -75,11 +99,11 @@ class Config(object):
     def __init__(self, settings=None):
         settings = settings or Settings()
         try:
-            cls = settings.FELICITY_BACKEND
+            cls = settings.BACKEND
         except AttributeError:
             cls = None
         if not cls:
-            raise Exception('FELICITY_BACKEND is a required setting')
+            raise Exception('BACKEND is a required setting')
         cls = import_object(cls)
         backend = cls(settings)
         self.__dict__['settings'] = settings
@@ -87,7 +111,7 @@ class Config(object):
 
     def __getattr__(self, key):
         try:
-            default, help_text = self.settings.FELICITY_CONFIG[key]
+            default, help_text = self.settings.CONFIG[key]
         except KeyError:
             raise AttributeError(key)
         result = self.backend.get(key)
@@ -98,10 +122,10 @@ class Config(object):
         return result
 
     def __setattr__(self, key, value):
-        if key not in self.settings.FELICITY_CONFIG:
+        if key not in self.settings.CONFIG:
             raise AttributeError(key)
         self.backend.set(key, value)
 
     def __dir__(self):
-        return self.settings.FELICITY_CONFIG.keys()
+        return self.settings.CONFIG.keys()
 

@@ -1,5 +1,5 @@
 import lazy_object_proxy
-from .base import Config, Settings
+from .base import Config, Settings, EMPTY
 
 __version__ = '0.0.1'
 
@@ -15,4 +15,6 @@ def LazyConfig():
 
 config = LazyConfig()
 
+def register_setting(key, val=EMPTY):
+    Settings.setdefault(key, val)
 

@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+import os
 from datetime import datetime, date, time
 from decimal import Decimal
 import six
@@ -7,9 +8,21 @@ if six.PY3:
     def long(value):
         return value
 
+import pytest
+
 from felicity import settings
 from felicity.base import Config
 
+REDIS_RUNNING = bool(int(os.environ.get('REDIS_RUNNING', 0)))
+MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
+
+skipifnoredis = pytest.mark.skipif(
+    not REDIS_RUNNING, reason='No redis server found.'
+)
+
+skipifnomongo = pytest.mark.skipif(
+    not MONGO_RUNNING, reason='No mongodb server found.'
+)
 
 class StorageTestsMixin(object):
 

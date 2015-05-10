@@ -85,6 +85,7 @@ class Settings(object):
                 val = EMPTY
         if val is EMPTY:
             raise AttributeError(key)
+        # cache on the instance
         setattr(self, key, val)
         return val
 
@@ -116,10 +117,11 @@ class Config(object):
         backend = cls(settings)
         self.__dict__['settings'] = settings
         self.__dict__['backend'] = backend
+        self.__dict__['_initial'] = getattr(settings, 'CONFIG', {})
 
     def __getattr__(self, key):
         try:
-            default, help_text = self.settings.CONFIG[key]
+            default, help_text = self._initial[key]
         except KeyError:
             raise AttributeError(key)
         result = self.backend.get(key)
@@ -130,10 +132,10 @@ class Config(object):
         return result
 
     def __setattr__(self, key, value):
-        if key not in self.settings.CONFIG:
+        if key not in self._initial:
             raise AttributeError(key)
         self.backend.set(key, value)
 
     def __dir__(self):
-        return self.settings.CONFIG.keys()
+        return self._initial.keys()
 

@@ -124,12 +124,11 @@ class Config(object):
             default, help_text = self._initial[key]
         except KeyError:
             raise AttributeError(key)
-        result = self.backend.get(key)
-        if result is None:
-            result = default
+        ret = self.backend.get(key)
+        if ret is None:
+            ret = default
             setattr(self, key, default)
-            return result
-        return result
+        return ret
 
     def __setattr__(self, key, value):
         if key not in self._initial:

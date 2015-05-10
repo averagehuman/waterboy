@@ -2,6 +2,7 @@
 import os
 from datetime import datetime, date, time
 from decimal import Decimal
+import types
 import six
 
 if six.PY3:
@@ -10,8 +11,9 @@ if six.PY3:
 
 import pytest
 
-from felicity import settings
-from felicity.base import Config
+import felicity
+
+from .settings import FELICITY_CONFIG as TEST_CONFIG
 
 REDIS_RUNNING = bool(int(os.environ.get('REDIS_RUNNING', 0)))
 MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
@@ -24,10 +26,39 @@ skipifnomongo = pytest.mark.skipif(
     not MONGO_RUNNING, reason='No mongodb server found.'
 )
 
+def mkconfig(backend, **kwargs):
+    overrides = {'BACKEND': backend, 'CONFIG': TEST_CONFIG}
+    overrides.update(kwargs)
+    settings = felicity.Settings()
+    settings.configure(**overrides)
+    config = felicity.Config(settings)
+    return config
+
+def clearstore(method):
+    def inner(self, *args, **kwargs):
+        ret = method(self, *args, **kwargs)
+        self.config.clear()
+        return ret
+    return inner
+
+class StorageTestsType(type):
+
+    def __new__(cls, name, bases, attrs):
+        newattrs = {}
+        for k, v in attrs.items():
+            if k.startswith('test_') and isinstance(v, types.FunctionType):
+                print(k)
+                newattrs[k] = clearstore(v)
+            else:
+                newattrs[k] = v
+        t = type.__new__(cls, name, bases, newattrs)
+        return t
+
+@six.add_metaclass(StorageTestsType)
 class StorageTestsMixin(object):
 
     def setUp(self):
-        self.config = Config(settings)
+        self.config = felicity.Config(felicity.settings)
         super(StorageTestsMixin, self).setUp()
 
     def test_store(self):
@@ -97,3 +128,9 @@ class StorageTestsMixin(object):
         assert self.config.FLOAT_VALUE == 3.1415926536  # this should be the default value
         assert self.config.DATE_VALUE == date(2001, 12, 20)
         assert self.config.TIME_VALUE == time(1, 59, 0)
+
+class BaseLiveTests(object):
+
+    def test_false(self):
+        assert 1 == 2
+

@@ -12,7 +12,7 @@ if not six.PY3:
     long_value = long(long_value)
 
 FELICITY_BACKEND = 'felicity.backends.redisd.RedisBackend'
-FELICITY_REDIS_PREFIX = 'felicity:'
+FELICITY_REDIS_PREFIX = ''
 FELICITY_REDIS_CONNECTION_CLASS = 'tests.storage.MockRedisConnection'
 FELICITY_REDIS_CONNECTION = {}
 FELICITY_DATABASE_SUPERUSER_ONLY = True

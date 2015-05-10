@@ -41,6 +41,10 @@ class RedisBackend(Backend):
             else:
                 self._rd = redis.Redis(**settings.REDIS_CONNECTION)
 
+    @property
+    def client(self):
+        return self._rd
+
     def add_prefix(self, key):
         return "%s%s" % (self._prefix or '', key)
 

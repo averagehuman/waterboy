@@ -5,7 +5,12 @@
 build/
 dist/
 test.db
+dump.rdb
 .tox
 .coverage
+.buildout
 docs/_build
+bin
 env
+downloads
+data

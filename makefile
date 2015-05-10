@@ -47,6 +47,10 @@ redis:
 test: venv
 	@$(TOX)
 
+.PHONY: shell
+shell:
+	@./bin/python
+
 .PHONY: clean
 clean:
 	@rm -rf .tox

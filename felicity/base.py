@@ -138,3 +138,5 @@ class Config(object):
     def __dir__(self):
         return self._initial.keys()
 
+    def clear(self):
+        self.backend.delete(*self._initial.keys())

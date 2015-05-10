@@ -64,3 +64,7 @@ class RedisBackend(Backend):
 
     def set(self, key, value):
         self._rd.set(self.add_prefix(key), pickle(value))
+
+    def delete(self, *keys):
+        self._rd.delete(*(self.add_prefix(key) for key in keys))
+

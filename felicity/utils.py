@@ -31,9 +31,6 @@ def import_object(name):
     import_object('x.y.z') is equivalent to 'from x.y import z'.
 
     """
-    name = str(name)
-    if '.' not in name:
-        return __import__(name)
     parts = name.split('.')
     m = '.'.join(parts[:-1])
     attr = parts[-1]

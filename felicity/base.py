@@ -4,13 +4,24 @@ import six
 
 from .utils import import_object
 
-DEFAULT_SETTINGS_MODULE = 'settings'
 PREFIX = 'FELICITY_'
+CONFIG_SCHEMA_KEY = 'CONFIG_SCHEMA'
+CONFIG_BACKEND_KEY = 'CONFIG_BACKEND'
+CONFIG_IS_STRICT_KEY = 'CONFIG_IS_STRICT'
+DEFAULT_BACKEND = 'redis'
 EMPTY = object()
+
+def register_setting(key, val=EMPTY):
+    Settings.register(key, val)
 
 class Settings(object):
 
     _defaults = {}
+
+    @classmethod
+    def register(cls, key, default):
+        """Register individual settings by calling this method"""
+        cls._defaults[cls.prefixed(key)] = default
 
     @classmethod
     def prefixed(cls, key):
@@ -22,43 +33,38 @@ class Settings(object):
             key = PREFIX + key
         return key
 
-    @classmethod
-    def setdefault(cls, key, default):
-        cls._defaults[cls.prefixed(key)] = default
+    def __init__(self, initial_settings=None, **overrides):
+        """Initialise new settings object.
 
-    def __init__(self):
-        self.__dict__['_settings'] = EMPTY
+        initial_settings can be a module, class, dictionary (or anything with
+        a '__dict__'), and may optionally be given as a "dotted string".
 
-    def _update_settings_map(self, mapping, d):
-        """Update mapping with values from d that have uppercase keys"""
-        for k, v in d.items():
-            if k and k == k.upper():
-                mapping[self.prefixed(k)] = v
-
-    def configure(self, settings_module=None, **overrides):
-        if self.configured:
-            raise Exception("settings are already configured.")
-
+        """
         initial = None
-        if isinstance(settings_module, six.string_types):
-            __import__(settings_module)
-            settings_module = sys.modules[settings_module]
+        if isinstance(initial_settings, six.string_types):
+            try:
+                __import__(initial_settings)
+            except ImportError:
+                initial_settings = import_object(initial_settings)
+            else:
+                initial_settings = sys.modules[initial_settings]
 
-        if settings_module:
-            initial = settings_module.__dict__
+        if initial_settings:
+            if hasattr(initial_settings, '__dict__'):
+                # class or module
+                initial = initial_settings.__dict__
+            else:
+                # dict
+                initial = initial_settings
         else:
             # try django settings
             try:
                 from django.conf import settings as django_settings
             except ImportError:
-                # look for settings.py in the current directory
-                try:
-                    __import__(DEFAULT_SETTINGS_MODULE)
-                except ImportError:
-                    pass
-                else:
-                    initial = sys.modules[DEFAULT_SETTINGS_MODULE].__dict__
+                pass
             else:
+                if not django_settings.configured:
+                    django_settings._setup()
                 # Django settings are proxied
                 initial = django_settings._wrapped.__dict__
         d = {}
@@ -66,15 +72,14 @@ class Settings(object):
             self._update_settings_map(d, initial)
         if overrides:
             self._update_settings_map(d, overrides)
-        self._settings = d
-
-    @property
-    def configured(self):
-        return self._settings is not EMPTY
-
+        self.__dict__['_settings'] = d
+        self.__dict__['_backend'] = BackendProxy(
+            d.get(self.prefixed(CONFIG_BACKEND_KEY), DEFAULT_BACKEND),
+            schema=d.get(self.prefixed(CONFIG_SCHEMA_KEY)),
+            strict=d.get(self.prefixed(CONFIG_IS_STRICT_KEY), False),
+         )
+        
     def __getattr__(self, key):
-        if self._settings is EMPTY:
-            self.configure()
         prefixed_key = self.prefixed(key)
         try:
             val = self._settings[prefixed_key]
@@ -89,9 +94,19 @@ class Settings(object):
         setattr(self, key, val)
         return val
 
-class Config(object):
+    def _update_settings_map(self, mapping, d):
+        """Update mapping with values from d that have uppercase keys"""
+        for k, v in d.items():
+            if k and k == k.upper():
+                mapping[self.prefixed(k)] = v
+
+    @property
+    def backend(self):
+        return self._backend
+
+class BackendProxy(object):
     """
-    The global config wrapper that handles the backend.
+    A proxy object to the backend data store.
     """
 
     aliases = {
@@ -100,43 +115,38 @@ class Config(object):
         'database': 'felicity.contrib.django_felicity.backend.DatabaseBackend',
     }
 
-    def __init__(self, settings=None):
-        settings = settings or Settings()
-        try:
-            cls = settings.BACKEND
-        except AttributeError:
-            cls = None
-        if not cls:
-            raise Exception('BACKEND is a required setting')
+    def __init__(self, backend, schema=None, strict=False):
+        backend = backend or DEFAULT_BACKEND
         try:
             # may be an alias
-            cls = self.aliases[cls]
+            cls = self.aliases[backend]
         except KeyError:
             pass
         cls = import_object(cls)
         backend = cls(settings)
-        self.__dict__['settings'] = settings
-        self.__dict__['backend'] = backend
-        self.__dict__['_initial'] = getattr(settings, 'CONFIG', {})
+        self._backend = backend
+        self._schema = schema or {}
+        self._strict = strict
 
-    def __getattr__(self, key):
+    def get(self, key):
         try:
-            default, help_text = self._initial[key]
+            default, help_text = self._schema[key]
         except KeyError:
             raise AttributeError(key)
-        ret = self.backend.get(key)
+        ret = self._backend.get(key)
         if ret is None:
             ret = default
             setattr(self, key, default)
         return ret
 
-    def __setattr__(self, key, value):
-        if key not in self._initial:
+    def set(self, key, value):
+        if self._strict and key not in self._schema:
             raise AttributeError(key)
-        self.backend.set(key, value)
-
-    def __dir__(self):
-        return self._initial.keys()
+        self._backend.set(key, value)
 
     def clear(self):
-        self.backend.delete(*self._initial.keys())
+        self._backend.delete(*self._schema.keys())
+
+    def __dir__(self):
+        return self._schema.keys()
+

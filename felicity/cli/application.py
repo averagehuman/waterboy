@@ -77,7 +77,7 @@ class UI(App):
             '-s', '--settings',
             action='store',
             default='settings',
-            help="dotted path to settings module (optional but recommended)",
+            help="dotted path to settings module (optional)",
         )
         return parser
 

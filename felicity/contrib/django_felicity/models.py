@@ -12,7 +12,7 @@ except ImportError:
                                "the felicity database backend.")
 
 
-class Felicity(models.Model):
+class Config(models.Model):
     key = models.CharField(max_length=255, unique=True)
     value = PickledObjectField()
 

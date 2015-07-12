@@ -5,6 +5,9 @@ Defines the base felicity backend
 
 class Backend(object):
 
+    def add_prefix(self, key):
+        return "%s%s" % (self._prefix or '', key)
+
     def get(self, key):
         """
         Get the key from the backend store and return the value.

@@ -7,22 +7,26 @@ try:
 except ImportError:
     from django.core.cache.backends.locmem import CacheClass as LocMemCache
 
-from felicity import register_setting
+from django.conf import settings
+
+from felicity.base import CONFIG_SCHEMA_KEY
 from felicity.backends import Backend
 
+
 # optional
-register_setting('DATABASE_SUPERUSER_ONLY', False)
-register_setting('DATABASE_CACHE_BACKEND', None)
-register_setting('DATABASE_CACHE_AUTOFILL_TIMEOUT', 60 * 60 * 24)
-register_setting('DATABASE_PREFIX', '')
+CACHE_BACKEND = None
+CACHE_AUTOFILL_TIMEOUT = 60 * 60 * 24
+PREFIX = ''
 
 
 class DatabaseBackend(Backend):
-    def __init__(self, settings):
-        from .models import Felicity
-        self._model = Felicity
-        self._prefix = settings.DATABASE_PREFIX
-        self._autofill_timeout = settings.DATABASE_CACHE_AUTOFILL_TIMEOUT
+    def __init__(
+            self, prefix=PREFIX, cache=CACHE_BACKEND, cache_autofill_timeout=CACHE_AUTOFILL_TIMEOUT
+        ):
+        from .models import Config
+        self._model = Config
+        self._prefix = prefix
+        self._autofill_timeout = cache_autofill_timeout
         self._autofill_cachekey = 'autofilled'
 
         if not self._model._meta.installed:
@@ -30,8 +34,8 @@ class DatabaseBackend(Backend):
                 "The felicity.backends.database app isn't installed "
                 "correctly. Make sure it's in your INSTALLED_APPS setting.")
 
-        if settings.DATABASE_CACHE_BACKEND:
-            self._cache = get_cache(settings.DATABASE_CACHE_BACKEND)
+        if cache:
+            self._cache = get_cache(cache)
             if isinstance(self._cache, LocMemCache):
                 raise ImproperlyConfigured(
                     "The DATABASE_CACHE_BACKEND setting refers to a "
@@ -40,16 +44,16 @@ class DatabaseBackend(Backend):
                     % settings.DATABASE_CACHE_BACKEND)
         else:
             self._cache = None
-        self._keys = settings.CONFIG.keys()
-        self.autofill()
+        schema = getattr(settings, CONFIG_SCHEMA_KEY, None)
+        self._keys = None
+        if schema:
+            self._keys = schema.keys()
+            self.autofill()
         # Clear simple cache.
         post_save.connect(self.clear, sender=self._model)
 
-    def add_prefix(self, key):
-        return "%s%s" % (self._prefix, key)
-
     def autofill(self):
-        if not self._autofill_timeout or not self._cache:
+        if not self._keys or not self._autofill_timeout or not self._cache:
             return
         full_cachekey = self.add_prefix(self._autofill_cachekey)
         if self._cache.get(full_cachekey):

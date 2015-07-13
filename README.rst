@@ -1,31 +1,24 @@
-Felicity - Dynamic Application settings
+Waterboy - Dynamic Application settings
 =======================================
 
-A library for storing editable settings in pluggable backend data stores.
+`waterboy`_ is a library that enables the storing of editable application
+settings in a backend data store (Redis and MongoDB currently supported).
 
 The idea is that a given application will have a configuration context
 consisting of both those settings which are not expected to vary for any given
-deployment, and those settings which may vary during the lifetime of a
-deployment (for example, third party keys or urls). It is these latter settings
-which we want to store in some backend data store in order to make them more
-easily editable by an application user or administrator.
+deployment, and those settings which may vary or which must be accessible from
+outside the application (for example, third party keys or urls). It is these
+latter settings which we want to store in some backend data store in order to
+make them more easily editable by an application user or administrator.
 
-This is a forked and significantly updated version of `django-constance`_.
+This was originally a fork of `django-constance`_, but is now independent of
+Django and is essentially the backend-abstraction part of the original library.
 
-`felicity`_ aims to be framework-agnostic but will fall back to use Django
-settings if possible, and in this case will work similarly to the original
-project.
+Usage
+-----
 
-`felicity`_ currently has builtin support for Redis, MongoDB and Django model
-backends.
-
-Settings and Config
--------------------
-
-The different settings types are represented in `felicity`_ by a
-*Settings* class and a *Config* class. It is for a settings object (most
-likely populated via some python module) to define a *CONFIG* attribute which
-is of the form::
+In your application configuration you define the settings that you want to be
+editable in a dictionary of the form::
 
     CONFIG = {
         '<KEY>': (<DEFAULT>, '<HELP TEXT>'),
@@ -48,9 +41,26 @@ For example::
         'TIME_VALUE': (time(23, 59, 59), 'And happy New Year'),
     }
 
-Attempts to get or set values on the *Config* object will fail with a KeyError
-if the key does not exist in the *CONFIG* setting.
+Then create a Config object based on these initial settings. For example, using Redis::
+
+    >>> from waterboy import RedisConfig
+    >>> cfg = RedisConfig(initial=CONFIG)
+
+You then retrieve settings from the backend with attribute-style access.
+
+    >>> cfg.INT_VALUE
+    1
+
+If the backend returns None then the default value is returned.
+
+Similarly, setting an attribute on the Config object will transparently "upsert"
+that value in the backend.
+
+Attempts to get or set values on the Config object will fail with an AttributeError
+if the key does not exist in the initial defaults dictionary.
+
+But this behaviour may be modified by passing **strict=True** to the Config constructor.
 
 .. _django-constance: http://django-constance.readthedocs.org/
-.. _felicity: https://github.com/gmflanagan/felicity
+.. _waterboy: https://github.com/gmflanagan/waterboy
 

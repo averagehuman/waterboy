@@ -11,6 +11,7 @@ if six.PY3:
         return value
 
 def clearstore(method):
+    """Method decorator that clears the backend before returning."""
     def inner(self, *args, **kwargs):
         ret = method(self, *args, **kwargs)
         self.config.clear()
@@ -18,7 +19,13 @@ def clearstore(method):
     return inner
 
 class ConfigTestType(type):
-    """Per-method setUp/tearDown for test classes"""
+    """Per-method setUp/tearDown for test classes.
+
+    Applies the clearstore decorator to any method starting with 'test_'.
+
+    Use this so that the base test class ConfigTestCase can stay compatible
+    with unittest and pytest.
+    """
 
     def __new__(cls, name, bases, attrs):
         newattrs = {}
@@ -50,6 +57,7 @@ class ConfigTestCase(object):
 
     @property
     def config(self):
+        """Create the config object with backend given by BACKEND"""
         try:
             cfg = self._cfg
         except AttributeError:
@@ -115,17 +123,6 @@ class ConfigTestCase(object):
         assert self.config.FLOAT_VALUE == 2.718281845905
         assert self.config.DATE_VALUE == date(2001, 12, 20)
         assert self.config.TIME_VALUE == time(1, 59, 0)
-
-    def test_nonexistent(self):
-        try:
-            self.config.NON_EXISTENT
-        except Exception as e:
-            assert type(e) == AttributeError
-
-        try:
-            self.config.NON_EXISTENT = 1
-        except Exception as e:
-            assert type(e) == AttributeError
 
     def test_missing_values(self):
         # set some values and leave out others

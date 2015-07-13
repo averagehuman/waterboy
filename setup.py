@@ -28,9 +28,9 @@ extras = {
 }
 
 setup(
-    name='felicity',
-    version=find_version("felicity", "__init__.py"),
-    url="http://github.com/gmflanagan/felicity",
+    name='waterboy',
+    version=find_version("waterboy", "__init__.py"),
+    url="http://github.com/gmflanagan/waterboy",
     description='Live application settings with pluggable backends, including Redis and MongoDB.',
     long_description=read('README.rst'),
     author='Jerd Flanagan',

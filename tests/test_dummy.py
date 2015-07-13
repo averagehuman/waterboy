@@ -1,7 +1,7 @@
-import felicity.tests
+import waterboy.tests
 
 
-class TestDummyConfig(felicity.tests.ConfigTestCase):
+class TestDummyConfig(waterboy.tests.ConfigTestCase):
 
     BACKEND = 'dummy'
 

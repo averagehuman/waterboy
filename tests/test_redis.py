@@ -3,17 +3,16 @@ import os
 
 import pytest
 
-import felicity.tests
+import waterboy.tests
 from _utils import skipifnoredis
 
 
 @skipifnoredis
 def test_server_ping(redis):
-    ret = redis.backend.client.ping()
-    assert ret is True
+    assert redis.backend.client.ping() is True
 
 @skipifnoredis
-class TestRedis(felicity.tests.ConfigTestCase):
+class TestRedis(waterboy.tests.ConfigTestCase):
 
     BACKEND = 'redis'
 

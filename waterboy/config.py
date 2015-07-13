@@ -10,9 +10,9 @@ def register_default(key, val=None):
 class Config(object):
 
     alias = {
-        'redis': 'felicity.backends.RedisBackend',
-        'mongo': 'felicity.backends.MongoBackend',
-        'dummy': 'felicity.backends.DummyBackend',
+        'redis': 'waterboy.backends.RedisBackend',
+        'mongo': 'waterboy.backends.MongoBackend',
+        'dummy': 'waterboy.backends.DummyBackend',
     }
     _defaults = {}
 
@@ -62,12 +62,13 @@ class Config(object):
             initial = initial.__dict__
 
         config = self._defaults.copy()
-        for k, v in initial.iteritems():
+        for k, v in initial.items():
             if k and k.startswith(prefix):
                 config[k] = v
 
         backend = self.backend_instance(backend_class, backend_params)
 
+        # use self.__dict__ here so as not to invoke a recursive '__getattr__'
         self.__dict__['_config'] = config
         self.__dict__['_backend'] = backend
         self.__dict__['_prefix'] = prefix

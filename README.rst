@@ -8,8 +8,8 @@ The idea is that a given application will have a configuration context
 consisting of both those settings which are not expected to vary for any given
 deployment, and those settings which may vary or which must be accessible from
 outside the application (for example, third party keys or urls). It is these
-latter settings which we want to store in some backend data store in order to
-make them more easily editable by an application user or administrator.
+latter "live" settings which we want to store in order to make them more
+easily editable by an application user or administrator.
 
 This was originally a fork of `django-constance`_, but is now independent of
 Django and is essentially the backend-abstraction part of the original library.
@@ -59,8 +59,39 @@ that value in the backend.
 Attempts to get or set values on the Config object will fail with an AttributeError
 if the key does not exist in the initial defaults dictionary.
 
-But this behaviour may be modified by passing **strict=True** to the Config constructor.
+But this behaviour may be modified by passing **strict=False** to the Config constructor::
+
+    >>> cfg = RedisConfig(initial=CONFIG, strict=False)
+
+which will cause the existence check to be bypassed::
+
+    >>> cfg.ABCD = 'abcd'
+
+Development
+-----------
+
+The source is on `github`_.
+
+Clone and run tests::
+
+    $ git clone git@codebasehq.com:gflanagan/python/waterboy.git
+    $ cd waterboy
+    $ make test
+
+Tests are run via tox and pytest.
+
+If redis and mongo are not running on the standard ports then the tests associated
+with those backends will be skipped.
+
+To install redis and mongo locally, run buildout::
+
+    $ make buildout
+
+Then run redis in the foreground with::
+
+    $ ./bin/redis-server
 
 .. _django-constance: http://django-constance.readthedocs.org/
 .. _waterboy: https://github.com/gmflanagan/waterboy
+.. _github: https://github.com/gmflanagan/waterboy
 

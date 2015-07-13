@@ -75,6 +75,7 @@ class Config(object):
         self.__dict__['_strict'] = strict
 
     def __getattr__(self, key):
+        """Get a registered value from the associated backend."""
         prefixed_key = self.prefixed(key)
         try:
             default = self._config[prefixed_key]
@@ -88,6 +89,7 @@ class Config(object):
         return val
 
     def __setattr__(self, key, value):
+        """Save a registered value to the associated backend."""
         prefixed_key = self.prefixed(key)
         if self._strict and prefixed_key not in self._config:
             raise AttributeError(key)

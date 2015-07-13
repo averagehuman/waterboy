@@ -5,12 +5,12 @@ from decimal import Decimal
 
 import pytest
 
-from felicity import Config, RedisConfig
-import felicity.tests
+from waterboy import Config, RedisConfig
+import waterboy.tests
 
 @pytest.fixture
 def defaults():
-    return felicity.tests.ConfigTestCase.DEFAULTS
+    return waterboy.tests.ConfigTestCase.DEFAULTS
 
 @pytest.fixture
 def redis(request, defaults):

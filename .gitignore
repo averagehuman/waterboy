@@ -16,3 +16,4 @@ bin
 env
 downloads
 data
+__pycache__

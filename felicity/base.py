@@ -4,21 +4,12 @@ import six
 
 from .utils import import_object
 
-UNDEFINED = Object()
-
-class RedisConfig(Config):
-
-    def __init__(self, *args, **kwargs):
-        if args:
-            connection = args[0]
-            args = args[1:]
-        else:
-            connection = UNDEFINED
-        super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
+def register_default(key, val=None):
+    Config.register(key, val)
 
 class Config(object):
 
-    aliases = {
+    alias = {
         'redis': 'felicity.backends.redisd.RedisBackend',
         'mongo': 'felicity.backends.mongod.MongoBackend',
         'database': 'felicity.contrib.django_felicity.backend.DatabaseBackend',
@@ -32,15 +23,16 @@ class Config(object):
         cls._defaults[cls.prefixed(key)] = default
 
     @classmethod
-    def backend_instance(cls, constructor, params=UNDEFINED):
+    def backend_instance(cls, constructor, params=None):
         if isinstance(constructor, six.string_types):
             try:
                 # may be an alias
-                constructor = self.aliases[constructor]
+                constructor = self.alias[constructor]
             except KeyError:
                 pass
-            constructor = import_object(constructor)
-        if params is UNDEFINED:
+            if isinstance(constructor, six.string_types):
+                constructor = import_object(constructor)
+        if not params:
             instance = constructor()
         elif isinstance(params, types.ListType):
             instance = constructor(*params)
@@ -50,7 +42,7 @@ class Config(object):
             instance = constructor(params)
         return instance
 
-    def __init__(self, backend_class, backend_params, initial=None, prefix='', strict=True):
+    def __init__(self, backend_class, backend_params=None, initial=None, prefix='', strict=True):
         """Initialise new config object.
 
         initial can be a module, class, dictionary (or anything with a
@@ -117,6 +109,23 @@ class Config(object):
     def clear(self):
         self._backend.delete(*self._config.keys())
 
-def register_default(key, val=None):
-    Config.register(key, val)
+class RedisConfig(Config):
+
+    def __init__(self, *args, **kwargs):
+        if args:
+            connection = args[0]
+            args = args[1:]
+        else:
+            connection = None
+        super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
+
+class MongoConfig(Config):
+
+    def __init__(self, *args, **kwargs):
+        if args:
+            connection = args[0]
+            args = args[1:]
+        else:
+            connection = None
+        super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
 

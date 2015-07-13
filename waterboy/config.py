@@ -12,7 +12,7 @@ class Config(object):
     alias = {
         'redis': 'waterboy.backends.RedisBackend',
         'mongo': 'waterboy.backends.MongoBackend',
-        'dummy': 'waterboy.backends.DummyBackend',
+        'dict': 'waterboy.backends.DictBackend',
     }
     _defaults = {}
 
@@ -112,6 +112,11 @@ class Config(object):
     def clear(self):
         self._backend.delete(*self._config.keys())
 
+class DictConfig(Config):
+
+    def __init__(self, *args, **kwargs):
+        super(DictConfig, self).__init__('dict', *args, **kwargs)
+
 class RedisConfig(Config):
 
     def __init__(self, *args, **kwargs):
@@ -131,9 +136,4 @@ class MongoConfig(Config):
         else:
             connection = None
         super(MongoConfig, self).__init__('mongo', connection, *args, **kwargs)
-
-class DummyConfig(Config):
-
-    def __init__(self, *args, **kwargs):
-        super(DummyConfig, self).__init__('dummy', *args, **kwargs)
 

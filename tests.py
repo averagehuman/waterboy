@@ -16,9 +16,9 @@ skipifnomongo = pytest.mark.skipif(
 )
 
 
-class TestDummyConfig(waterboy.tests.ConfigTestCase):
+class TestDictConfig(waterboy.tests.ConfigTestCase):
 
-    BACKEND = 'dummy'
+    BACKEND = 'dict'
 
 @skipifnoredis
 def test_server_ping(redis):

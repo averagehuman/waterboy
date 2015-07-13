@@ -37,7 +37,8 @@ class Backend(object):
         """
         raise NotImplementedError
 
-class DummyBackend(dict):
+class DictBackend(dict):
+    """A mock backend using a dictionary."""
 
     def set(self, key, value):
         self[key] = value

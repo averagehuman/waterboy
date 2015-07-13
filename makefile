@@ -55,6 +55,7 @@ shell:
 clean:
 	@rm -rf .tox
 	@rm -rf .buildout
+	@rm -rf bin
 	@rm -rf *.egg-info
 
 .PHONY: environ

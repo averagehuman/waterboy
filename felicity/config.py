@@ -12,7 +12,7 @@ class Config(object):
     alias = {
         'redis': 'felicity.backends.redisd.RedisBackend',
         'mongo': 'felicity.backends.mongod.MongoBackend',
-        'database': 'felicity.contrib.django_felicity.backend.DatabaseBackend',
+        'database': 'felicity.django_felicity.backend.DatabaseBackend',
     }
     _defaults = {}
 

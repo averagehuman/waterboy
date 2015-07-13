@@ -1,5 +1,5 @@
 #import lazy_object_proxy
-from .base import Settings, EMPTY, register_setting
+from .config import Config, RedisConfig, MongoConfig, register_default
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 

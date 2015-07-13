@@ -10,9 +10,9 @@ def register_default(key, val=None):
 class Config(object):
 
     alias = {
-        'redis': 'felicity.backends.redisd.RedisBackend',
-        'mongo': 'felicity.backends.mongod.MongoBackend',
-        'dummy': 'felicity.backends.dummy.DummyBackend',
+        'redis': 'felicity.backends.RedisBackend',
+        'mongo': 'felicity.backends.MongoBackend',
+        'dummy': 'felicity.backends.DummyBackend',
     }
     _defaults = {}
 

@@ -1,5 +1,7 @@
 .project
 .pydevproject
+*.swp
+*.swo
 *.pyc
 *.egg-info
 build/

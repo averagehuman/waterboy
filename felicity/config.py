@@ -12,7 +12,7 @@ class Config(object):
     alias = {
         'redis': 'felicity.backends.redisd.RedisBackend',
         'mongo': 'felicity.backends.mongod.MongoBackend',
-        'database': 'felicity.django_felicity.backend.DatabaseBackend',
+        'dummy': 'felicity.backends.dummy.DummyBackend',
     }
     _defaults = {}
 
@@ -27,7 +27,7 @@ class Config(object):
         if isinstance(constructor, six.string_types):
             try:
                 # may be an alias
-                constructor = self.alias[constructor]
+                constructor = cls.alias[constructor]
             except KeyError:
                 pass
             if isinstance(constructor, six.string_types):
@@ -82,7 +82,9 @@ class Config(object):
                 raise AttributeError(key)
             default = None
         val = self._backend.get(prefixed_key)
-        return val or default
+        if val is None:
+            val = default
+        return val
 
     def __setattr__(self, key, value):
         prefixed_key = self.prefixed(key)
@@ -127,5 +129,10 @@ class MongoConfig(Config):
             args = args[1:]
         else:
             connection = None
-        super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
+        super(MongoConfig, self).__init__('mongo', connection, *args, **kwargs)
+
+class DummyConfig(Config):
+
+    def __init__(self, *args, **kwargs):
+        super(DummyConfig, self).__init__('dummy', *args, **kwargs)
 

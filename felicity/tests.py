@@ -1,38 +1,14 @@
 # -*- encoding: utf-8 -*-
-import os
 from datetime import datetime, date, time
 from decimal import Decimal
 import types
 import six
 
+from .config import Config
+
 if six.PY3:
     def long(value):
         return value
-
-import pytest
-
-import felicity
-
-from .settings import FELICITY_CONFIG as TEST_CONFIG
-
-REDIS_RUNNING = bool(int(os.environ.get('REDIS_RUNNING', 0)))
-MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
-
-skipifnoredis = pytest.mark.skipif(
-    not REDIS_RUNNING, reason='No redis server found.'
-)
-
-skipifnomongo = pytest.mark.skipif(
-    not MONGO_RUNNING, reason='No mongodb server found.'
-)
-
-def mkconfig(backend, **kwargs):
-    overrides = {'BACKEND': backend, 'CONFIG': TEST_CONFIG}
-    overrides.update(kwargs)
-    settings = felicity.Settings()
-    settings.configure(**overrides)
-    config = felicity.Config(settings)
-    return config
 
 def clearstore(method):
     def inner(self, *args, **kwargs):
@@ -41,27 +17,70 @@ def clearstore(method):
         return ret
     return inner
 
-class StorageTestsType(type):
+class ConfigTestType(type):
+    """Per-method setUp/tearDown for test classes"""
 
     def __new__(cls, name, bases, attrs):
         newattrs = {}
         for k, v in attrs.items():
             if k.startswith('test_') and isinstance(v, types.FunctionType):
-                print(k)
                 newattrs[k] = clearstore(v)
             else:
                 newattrs[k] = v
         t = type.__new__(cls, name, bases, newattrs)
         return t
 
-@six.add_metaclass(StorageTestsType)
-class StorageTestsMixin(object):
+@six.add_metaclass(ConfigTestType)
+class ConfigTestCase(object):
 
-    def setUp(self):
-        self.config = felicity.Config(felicity.settings)
-        super(StorageTestsMixin, self).setUp()
+    BACKEND = None
+    DEFAULTS = {
+        'INT_VALUE': 1,
+        'LONG_VALUE': long(123456),
+        'FLOAT_VALUE': 3.1415926536,
+        'DECIMAL_VALUE': Decimal('0.1'),
+        'BOOL_VALUE': True,
+        'STRING_VALUE': 'Hello world',
+        'UNICODE_VALUE': six.u('Rivière-Bonjour'),
+        'DATETIME_VALUE': datetime(2010, 8, 23, 11, 29, 24),
+        'DATE_VALUE': date(2010, 12, 24),
+        'TIME_VALUE': time(23, 59, 59),
+    }
 
-    def test_store(self):
+
+    @property
+    def config(self):
+        try:
+            cfg = self._cfg
+        except AttributeError:
+            if not self.BACKEND:
+                raise Exception('BACKEND class attribute is not set.')
+            cfg = self._cfg = Config(self.BACKEND, initial=self.DEFAULTS)
+        return cfg
+
+    def test_get_invalid_key_fails(self):
+        try:
+            self.config.INVALID
+        except Exception as e:
+            assert type(e) == AttributeError
+
+    def test_set_invalid_key_fails(self):
+        try:
+            self.config.INVALID = 'XYZ'
+        except Exception as e:
+            assert type(e) == AttributeError
+
+    def test_get_valid_key_succeeds_and_returns_default_if_not_stored(self):
+        assert self.config.backend.get('INT_VALUE') is None
+        assert self.config.INT_VALUE == 1
+
+    def test_set_valid_key_succeeds_and_updates_store(self):
+        assert self.config.backend.get('INT_VALUE') is None
+        self.config.INT_VALUE = 2
+        assert self.config.backend.get('INT_VALUE') == 2
+
+    def test_get_set_by_attribute(self):
+        # get defaults
         assert self.config.INT_VALUE == 1
         assert self.config.LONG_VALUE == long(123456)
         assert self.config.BOOL_VALUE == True
@@ -73,7 +92,7 @@ class StorageTestsMixin(object):
         assert self.config.DATE_VALUE == date(2010, 12, 24)
         assert self.config.TIME_VALUE == time(23, 59, 59)
 
-        # set values
+        # set new values
         self.config.INT_VALUE = 100
         self.config.LONG_VALUE = long(654321)
         self.config.BOOL_VALUE = False
@@ -85,7 +104,7 @@ class StorageTestsMixin(object):
         self.config.DATE_VALUE = date(2001, 12, 20)
         self.config.TIME_VALUE = time(1, 59, 0)
 
-        # read again
+        # get new values
         assert self.config.INT_VALUE == 100
         assert self.config.LONG_VALUE == long(654321)
         assert self.config.BOOL_VALUE == False
@@ -128,9 +147,4 @@ class StorageTestsMixin(object):
         assert self.config.FLOAT_VALUE == 3.1415926536  # this should be the default value
         assert self.config.DATE_VALUE == date(2001, 12, 20)
         assert self.config.TIME_VALUE == time(1, 59, 0)
-
-class BaseLiveTests(object):
-
-    def test_false(self):
-        assert 1 == 2
 

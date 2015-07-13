@@ -3,8 +3,7 @@ from six.moves import zip
 
 import pymongo
 
-from .import Backend
-from .. import register_setting
+from . import Backend
 from ..utils import import_object, pickle, unpickle
 
 DEFAULT_CONNECTION = 'mongodb://localhost:27017/'

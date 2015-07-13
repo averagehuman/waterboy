@@ -20,22 +20,12 @@ def find_version(*file_paths):
 
 requires = [
     'six',
-    'lazy-object-proxy',
-    'cliff',
-    'logbook',
-    'pytest',
-    'pytest-cov',
 ]
 extras = {
     'database': ['django-picklefield'],
     'redis': ['redis'],
     'mongo': ['pymongo>=3.0.1'],
 }
-
-entry_points = '''
-[console_scripts]
-felicity=felicity.cli:main
-'''
 
 setup(
     name='felicity',
@@ -68,5 +58,4 @@ setup(
     zip_safe=False,
     install_requires=requires,
     extras_require=extras,
-    entry_points=entry_points,
 )

@@ -1,4 +1,5 @@
 import sys
+import types
 
 import six
 
@@ -34,9 +35,9 @@ class Config(object):
                 constructor = import_object(constructor)
         if not params:
             instance = constructor()
-        elif isinstance(params, types.ListType):
+        elif isinstance(params, list):
             instance = constructor(*params)
-        elif isinstance(params, types.DictType):
+        elif isinstance(params, dict):
             instance = constructor(**params)
         else:
             instance = constructor(params)
@@ -131,11 +132,11 @@ class RedisConfig(Config):
 
 class MongoConfig(Config):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, db, *args, **kwargs):
         if args:
             connection = args[0]
             args = args[1:]
         else:
             connection = None
-        super(MongoConfig, self).__init__('mongo', connection, *args, **kwargs)
+        super(MongoConfig, self).__init__('mongo', [db, connection], *args, **kwargs)
 

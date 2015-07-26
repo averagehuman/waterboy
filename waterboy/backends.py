@@ -97,7 +97,6 @@ class RedisBackend(Backend):
     def delete(self, *keys):
         self._rd.delete(*(self.add_prefix(key) for key in keys))
 
-
 class MongoBackend(Backend):
 
     def __init__(self, db, connection=MONGO_CONNECTION, collection=MONGO_COLLECTION, ns=NAMESPACE):
@@ -107,6 +106,8 @@ class MongoBackend(Backend):
             raise Exception(
                 "The Mongo backend requires pymongo to be installed."
             )
+        from bson.binary import Binary
+
         INDEX = [("ns", pymongo.ASCENDING), ("key", pymongo.ASCENDING)]
 
         if isinstance(connection, six.string_types):
@@ -117,11 +118,13 @@ class MongoBackend(Backend):
         self._collection = self._db[collection]
         self._namespace = ns
         self._collection.create_index(INDEX)
+        self._to_python = lambda val: unpickle(val)
+        self._from_python = lambda val: Binary(pickle(val))
 
     def get(self, key):
-        value = self._collection.find_one({'ns': self._namespace, 'key': key})
-        if value:
-            return unpickle(value)
+        row = self._collection.find_one({'ns': self._namespace, 'key': key})
+        if row:
+            return self._to_python(row['value'])
         return None
 
     def mget(self, keys):
@@ -130,11 +133,21 @@ class MongoBackend(Backend):
         query = self._collection.find({'ns': self._namespace})
         for key, value in zip(keys, query):
             if value:
-                yield key, unpickle(value)
+                yield key, self._to_python(value)
 
     def set(self, key, value):
         """Update or insert key->value"""
         self._collection.update_one(
-            {'ns': self._namespace, 'key': key}, pickle(value), upsert=True
+                {'ns': self._namespace, 'key': key},
+                {'$set': {'value': self._from_python(value)}},
+                upsert=True
         )
+
+    def delete(self, *keys):
+        if not keys:
+            return
+        elif len(keys) == 1:
+            self._collection.delete_one({'ns': self._namespace, 'key': key})
+        else:
+            self._collection.delete_many({'ns': self._namespace, 'key': {'$in': keys}})
 

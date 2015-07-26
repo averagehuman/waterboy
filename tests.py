@@ -3,6 +3,7 @@ import os
 import pytest
 
 import waterboy.tests
+MONGO_TEST_DATABASE = waterboy.tests.MONGO_TEST_DATABASE
 
 REDIS_RUNNING = bool(int(os.environ.get('REDIS_RUNNING', 0)))
 MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
@@ -28,6 +29,14 @@ def test_server_ping(redis):
 class TestRedisConfig(waterboy.tests.ConfigTestCase):
 
     BACKEND = 'redis'
+
+@skipifnomongo
+@pytest.mark.usefixtures("mongo_test_database")
+class TestMongoConfig(waterboy.tests.ConfigTestCase):
+
+    BACKEND = 'mongo'
+    BACKEND_PARAMS = [MONGO_TEST_DATABASE]
+
 
 
 

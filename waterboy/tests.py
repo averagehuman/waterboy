@@ -10,6 +10,8 @@ if six.PY3:
     def long(value):
         return value
 
+MONGO_TEST_DATABASE = 'waterboy-test'
+
 def clearstore(method):
     """Method decorator that clears the backend before returning."""
     def inner(self, *args, **kwargs):
@@ -41,6 +43,7 @@ class ConfigTestType(type):
 class ConfigTestCase(object):
 
     BACKEND = None
+    BACKEND_PARAMS = None
     DEFAULTS = {
         'INT_VALUE': 1,
         'LONG_VALUE': long(123456),
@@ -63,7 +66,7 @@ class ConfigTestCase(object):
         except AttributeError:
             if not self.BACKEND:
                 raise Exception('BACKEND class attribute is not set.')
-            cfg = self._cfg = Config(self.BACKEND, initial=self.DEFAULTS)
+            cfg = self._cfg = Config(self.BACKEND, backend_params=self.BACKEND_PARAMS, initial=self.DEFAULTS)
         return cfg
 
     def test_get_invalid_key_fails(self):

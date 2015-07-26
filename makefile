@@ -31,13 +31,11 @@ buildout: venv
 	fi;
 	@./bin/buildout
 
-.PHONY: mongo
-mongo:
-	@./bin/mongod.sh
-
-.PHONY: mongo.init
-mongo.init:
-	@./bin/mongo --eval "rs.initiate({ _id:'rs0', members:[{_id:0, host: 'localhost:27017'}]})"
+.PHONY: apt-get-mongodb
+apt-get-mongodb:
+	@apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+	@echo "deb http://repo.mongodb.org/apt/ubuntu $$(lsb_release -sc)/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+	@apt-get update && apt-get -y install mongodb-org
 
 .PHONY: redis
 redis:

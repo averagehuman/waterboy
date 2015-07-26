@@ -1,18 +1,19 @@
 # -*- encoding: utf-8 -*-
 
+import os
 from datetime import datetime, date, time
 from decimal import Decimal
 
 import pytest
 
 from waterboy import Config, RedisConfig
-import waterboy.tests
+import waterboy.testing
 
-MONGO_TEST_DATABASE = waterboy.tests.MONGO_TEST_DATABASE
+MONGO_TEST_DATABASE = waterboy.testing.MONGO_TEST_DATABASE
 
 @pytest.fixture
 def defaults():
-    return waterboy.tests.ConfigTestCase.DEFAULTS
+    return waterboy.testing.ConfigTestCase.DEFAULTS
 
 @pytest.fixture
 def redis(request, defaults):
@@ -22,14 +23,16 @@ def redis(request, defaults):
 
 @pytest.fixture
 def mongo_test_database(request, scope='session'):
-    from pymongo import MongoClient
-    client = MongoClient()
-    db = client[MONGO_TEST_DATABASE]
-    def dropdb():
-        client.drop_database(MONGO_TEST_DATABASE)
-        print("Dropped mongo database '%s'" % MONGO_TEST_DATABASE)
-    request.addfinalizer(dropdb)
-    return db
+    MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
+    if MONGO_RUNNING:
+        from pymongo import MongoClient
+        client = MongoClient()
+        db = client[MONGO_TEST_DATABASE]
+        def dropdb():
+            client.drop_database(MONGO_TEST_DATABASE)
+            print("Dropped mongo database '%s'" % MONGO_TEST_DATABASE)
+        request.addfinalizer(dropdb)
+        return db
 
 @pytest.fixture
 def mongo(request, mongo_test_database, defaults):

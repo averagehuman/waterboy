@@ -1,5 +1,4 @@
 import sys
-import types
 
 import six
 
@@ -116,11 +115,13 @@ class Config(object):
         self._backend.delete(*self._config.keys())
 
 class DictConfig(Config):
+    '''Dummy key/value store where the "backend" is just a python dictionary.'''
 
     def __init__(self, *args, **kwargs):
         super(DictConfig, self).__init__('dict', *args, **kwargs)
 
 class RedisConfig(Config):
+    """Redis-backed key/value store."""
 
     def __init__(self, *args, **kwargs):
         if args:
@@ -131,6 +132,10 @@ class RedisConfig(Config):
         super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
 
 class MongoConfig(Config):
+    """MongoDB-backed key/value store.
+
+    The first argument to the constructor must be the name of a mongodb database.
+    """
 
     def __init__(self, db, *args, **kwargs):
         if args:

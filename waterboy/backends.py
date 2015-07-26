@@ -130,10 +130,9 @@ class MongoBackend(Backend):
     def mget(self, keys):
         if not keys:
             return
-        query = self._collection.find({'ns': self._namespace})
-        for key, value in zip(keys, query):
-            if value:
-                yield key, self._to_python(value)
+        query = self._collection.find({'ns': self._namespace, 'key': {'$in': keys}})
+        for row in query:
+            yield row['key'], self._to_python(row['value'])
 
     def set(self, key, value):
         """Update or insert key->value"""

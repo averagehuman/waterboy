@@ -21,12 +21,12 @@ def clearstore(method):
     return inner
 
 class ConfigTestType(type):
-    """Per-method setUp/tearDown for test classes.
+    """Per-method tearDown for test classes.
 
     Applies the clearstore decorator to any method starting with 'test_'.
 
-    Use this so that the base test class ConfigTestCase can stay compatible
-    with unittest and pytest.
+    Use this rather than a tearDown method so that the base test class,
+    ConfigTestCase, can stay compatible with both unittest and pytest.
     """
 
     def __new__(cls, name, bases, attrs):
@@ -56,7 +56,6 @@ class ConfigTestCase(object):
         'DATE_VALUE': date(2010, 12, 24),
         'TIME_VALUE': time(23, 59, 59),
     }
-
 
     @property
     def config(self):

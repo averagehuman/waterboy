@@ -42,7 +42,7 @@ Then create a Config object based on these initial settings. For example, using 
     >>> from waterboy import RedisConfig
     >>> cfg = RedisConfig(initial=CONFIG)
 
-You then retrieve settings from the backend via attribute-style access.
+You then retrieve settings from the backend via attribute-style access::
 
     >>> cfg.INT_VALUE
     1
@@ -53,7 +53,7 @@ Similarly, setting an attribute on the Config object will transparently "upsert"
 (update or insert) that value in the backend.
 
 Attempts to get or set values on the Config object will fail with an AttributeError
-if the key does not exist in the initial defaults dictionary.
+if the key does not exist in the initial defaults dictionary::
 
     >>> cfg.ABCD = 'abcd'
     Traceback (most recent call last):

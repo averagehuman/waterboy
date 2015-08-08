@@ -1,8 +1,10 @@
 
 SHELL := /bin/bash
 
-MONGO_RUNNING := $(shell if $$(pgrep mongod &>/dev/null); then echo 1; else echo 0; fi)
 REDIS_RUNNING := $(shell if $$(pgrep redis-server &>/dev/null); then echo 1; else echo 0; fi)
+MONGO_RUNNING := $(shell if $$(pgrep mongod &>/dev/null); then echo 1; else echo 0; fi)
+REDIS_PORT := 39123
+MONGO_PORT := 39124
 
 VIRTUAL_ENV ?= $$(pwd)/env
 ENV := $(VIRTUAL_ENV)
@@ -11,8 +13,10 @@ PIP := $(ENV)/bin/pip
 TOX := $(ENV)/bin/tox
 
 export VIRTUAL_ENV
-export MONGO_RUNNING
 export REDIS_RUNNING
+export MONGO_RUNNING
+export REDIS_PORT
+export MONGO_PORT
 
 .PHONY: venv
 venv:
@@ -39,7 +43,15 @@ apt-get-mongodb:
 
 .PHONY: redis
 redis:
-	@./bin/redis-server
+	@./bin/redis-server --port $(REDIS_PORT)
+
+.PHONY: mongod
+mongod:
+	@./bin/mongod --port $(MONGO_PORT) --dbpath $$(pwd)/data --replSet rs0 --logpath $$(pwd)/logs/mongod.log --pidfilepath $$(pwd)/var/mongod.pid
+
+.PHONY: mongo
+mongo:
+	@./bin/mongo --port $(MONGO_PORT)
 
 .PHONY: test
 test: venv

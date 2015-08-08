@@ -17,3 +17,7 @@ env
 downloads
 data
 __pycache__
+logs/
+srv/
+var/
+tools/.downloads/

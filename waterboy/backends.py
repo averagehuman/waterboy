@@ -1,13 +1,16 @@
 """
 Backend key/value storage classes.
 """
+import os
 import six
 from six.moves import zip
 
 from .utils import import_object, pickle, unpickle
 
-REDIS_CONNECTION = 'redis://localhost:6379'
-MONGO_CONNECTION = 'mongodb://localhost:27017/'
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
+MONGO_PORT = os.environ.get('MONGO_PORT', 27107)
+REDIS_CONNECTION = 'redis://localhost:%s' % REDIS_PORT
+MONGO_CONNECTION = 'mongodb://localhost:%s/' % MONGO_PORT
 MONGO_COLLECTION = 'config'
 NAMESPACE = ''
 

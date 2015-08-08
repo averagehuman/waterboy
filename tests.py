@@ -8,6 +8,8 @@ MONGO_TEST_DATABASE = waterboy.testing.MONGO_TEST_DATABASE
 
 REDIS_RUNNING = bool(int(os.environ.get('REDIS_RUNNING', 0)))
 MONGO_RUNNING = bool(int(os.environ.get('MONGO_RUNNING', 0)))
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
+MONGO_PORT = os.environ.get('MONGO_PORT', 27107)
 
 class TestDictConfig(waterboy.testing.ConfigTestCase):
     """Test the dummy 'dict' backend."""
@@ -36,11 +38,11 @@ class TestRedisConfig(waterboy.testing.ConfigTestCase):
 def skipifnomongo(*args, **kwargs):
     return pytest.mark.skipif(not MONGO_RUNNING, reason='No mongodb server found.')(*args, **kwargs)
 
-@skipifnomongo
-@pytest.mark.usefixtures("mongo_test_database")
-class TestMongoConfig(waterboy.testing.ConfigTestCase):
-    """Test the mongo backend."""
+if MONGO_RUNNING:
+    @pytest.mark.usefixtures("mongo_test_database")
+    class TestMongoConfig(waterboy.testing.ConfigTestCase):
+        """Test the mongo backend."""
 
-    BACKEND = 'mongo'
-    BACKEND_PARAMS = [MONGO_TEST_DATABASE]
+        BACKEND = 'mongo'
+        BACKEND_PARAMS = [MONGO_TEST_DATABASE]
 

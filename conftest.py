@@ -6,7 +6,7 @@ from decimal import Decimal
 
 import pytest
 
-from waterboy import Config, RedisConfig
+from waterboy import KVStore, RedisConfig
 import waterboy.testing
 
 MONGO_TEST_DATABASE = waterboy.testing.MONGO_TEST_DATABASE

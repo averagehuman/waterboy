@@ -5,9 +5,9 @@ import six
 from .utils import import_object
 
 def register_default(key, val=None):
-    Config.register(key, val)
+    KVStore.register(key, val)
 
-class Config(object):
+class KVStore(object):
 
     alias = {
         'redis': 'waterboy.backends.RedisBackend',
@@ -100,8 +100,7 @@ class Config(object):
 
     def prefixed(self, key):
         """Prefixes keys if they are not already prefixed, so you have the
-        option of getting or setting using a prepended prefix (for clarity)
-        or not (for convenience).
+        option of getting or setting with or without a prefix.
         """
         if not key.startswith(self._prefix):
             key = self._prefix + key
@@ -114,13 +113,13 @@ class Config(object):
     def clear(self):
         self._backend.delete(*self._config.keys())
 
-class DictConfig(Config):
+class DictConfig(KVStore):
     '''Dummy key/value store where the "backend" is just a python dictionary.'''
 
     def __init__(self, *args, **kwargs):
         super(DictConfig, self).__init__('dict', *args, **kwargs)
 
-class RedisConfig(Config):
+class RedisConfig(KVStore):
     """Redis-backed key/value store."""
 
     def __init__(self, *args, **kwargs):
@@ -131,7 +130,7 @@ class RedisConfig(Config):
             connection = None
         super(RedisConfig, self).__init__('redis', connection, *args, **kwargs)
 
-class MongoConfig(Config):
+class MongoConfig(KVStore):
     """MongoDB-backed key/value store.
 
     The first argument to the constructor must be the name of a mongodb database.

@@ -4,7 +4,7 @@ from decimal import Decimal
 import types
 import six
 
-from .config import Config
+from .config import KVStore
 
 if six.PY3:
     def long(value):
@@ -65,7 +65,7 @@ class ConfigTestCase(object):
         except AttributeError:
             if not self.BACKEND:
                 raise Exception('BACKEND class attribute is not set.')
-            cfg = self._cfg = Config(self.BACKEND, backend_params=self.BACKEND_PARAMS, initial=self.DEFAULTS)
+            cfg = self._cfg = KVStore(self.BACKEND, backend_params=self.BACKEND_PARAMS, initial=self.DEFAULTS)
         return cfg
 
     def test_get_invalid_key_fails(self):

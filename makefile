@@ -76,4 +76,15 @@ environ:
 	@echo -n "REDIS_RUNNING: "
 	@if [ $(REDIS_RUNNING) -eq 0 ]; then echo "no"; else echo "yes"; fi
 
+.PHONY: sdist
+sdist:
+	$(PYTHON) setup.py sdist
+
+.PHONY: register
+register:
+	$(PYTHON) setup.py register
+
+.PHONY: upload
+upload:
+	$(PYTHON) setup.py sdist upload
 

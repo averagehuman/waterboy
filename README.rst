@@ -12,6 +12,13 @@ Tested with Python 2.7 and Python 3.4.
 
 The source is on `github`_.
 
+Installation
+------------
+
+::
+
+    $ pip install waterboy
+
 Usage
 -----
 
